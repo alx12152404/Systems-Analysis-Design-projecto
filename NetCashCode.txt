@@ -1,0 +1,393 @@
+package atm;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.*;
+
+public class Account {
+	
+	String accountNumber;
+	String pin;
+	double balance;
+	
+/*	Account(String aNumber, String p)
+	{
+		this.accountNumber = aNumber;
+		this.pin = p;
+		
+	}
+	
+	*/
+	
+	public boolean checkAccounts(String accountNumber, String pin) throws FileNotFoundException
+	{
+		//System.out.println(accountNumber);
+		File file = new File("C:/Users/User/Documents/details.txt");
+		Scanner sc = new Scanner(file);
+		String scannedNumber;
+		String scannedPin;
+		double scannedBalance;
+		//scannedNumber = sc.findInLine("[0-9],{9}");
+		//scannedPin = sc.findInLine("[0-9],{4}");
+		
+		while(sc.hasNextLine())
+		{
+			scannedNumber = sc.next();
+			scannedPin = sc.next();
+			scannedBalance = sc.nextDouble();
+			
+			//System.out.println(scannedNumber + scannedPin);
+			
+			if(scannedNumber.equals(accountNumber) && pin.equals(scannedPin))
+			{
+				this.accountNumber = accountNumber;
+				this.pin = pin;
+				this.balance = scannedBalance;
+				sc.close();
+				System.out.println(accountNumber);
+				return true;
+			}	
+			//System.out.println(sc.nextLine());
+			sc.nextLine();
+		}
+		sc.close();
+		System.out.println("login failed"); 
+		return false;
+		
+	}
+	
+	public boolean checkBalance(Double value)
+	{
+		if(this.balance >= value)
+		{
+			return true;
+		}
+		else return false;
+	}
+
+	public void updateInfo() throws FileNotFoundException
+	{
+		File file = new File("C:/Users/User/Documents/details.txt");
+		Scanner sc = new Scanner(file);
+		//code here to edit balance
+		System.out.println("well done");
+	}
+}
+
+
+
+package atm;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+import javax.swing.JButton;
+
+public class ATM {
+	
+	static String accountNumber;
+    static String pin;
+    static SessionManager thisSession;
+
+	
+	public static void main(String[]args) throws FileNotFoundException
+	{
+        
+		ATMUI atmUI = new ATMUI();
+		atmUI.Frame();
+		ATM atm = new ATM();
+		atm.Login();
+		
+	}
+	
+	public void Login() throws FileNotFoundException
+	{
+		Account account = new Account();
+		String accountNumber;
+	    String pin;
+		//atmUI.LoginUI(this);
+	    System.out.println("Enter your username: ");
+	    Scanner scanner = new Scanner(System.in);
+	    accountNumber = scanner.nextLine();
+	    System.out.println("Enter your pin: ");
+	    pin = scanner.nextLine();
+	    System.out.println("Enterr");
+	    
+		if(account.checkAccounts(accountNumber, pin))
+		{
+			thisSession = new SessionManager();		
+			this.mainMenu(account);
+			
+		}
+		else 
+		{	
+			System.out.println("Login failed. Try again");
+			
+			this.Login();
+		}	
+	}
+	
+	public void mainMenu(Account account) throws FileNotFoundException
+	{
+		/*String selection;
+		switch(selection)
+		{
+		
+		    
+		}
+		*/
+		String selection;
+		Scanner scanner = new Scanner(System.in);
+		System.out.println("Would you like to Withdraw or Transfer funds?");
+		selection = scanner.nextLine();
+		
+		switch(selection)
+		{
+		case "Withdraw":
+			this.withdraw(account);
+			break;
+			
+		case "Transfer":
+		    this.transfer(account);
+		    break;
+			
+		}
+		
+		
+		
+	}
+	
+	public void withdraw(Account account) throws FileNotFoundException
+	{
+		if(thisSession.verifySessionIntegrity())
+		{
+			double amount;
+			Scanner sc = new Scanner(System.in);
+			System.out.println("How much would you like to Withdraw?");
+			amount = sc.nextDouble();
+			
+			if(account.checkBalance(amount) && thisSession.verifySessionIntegrity())
+			{
+				account.balance -= amount;
+				System.out.println("You have withdrawn " + amount + " from your account");
+				account.updateInfo();
+			}
+			
+		}
+		else
+		{
+			this.Login();
+		}
+		
+	}
+	
+	public void transfer(Account account)
+	{
+		thisSession.verifySessionIntegrity();
+		System.out.println("What is the account number of the account you wish to transfer to?");
+		
+		
+	}
+
+	
+	
+	
+	public void incorrectCredentials()
+	{
+		
+	}
+	
+	public void setAccountNumber(String loginAccountNumber)
+	{
+		
+		this.accountNumber = loginAccountNumber;
+		
+	}
+	
+	public String getAccountNumber()
+	{
+		return this.accountNumber;
+	}
+	
+	public void setPin(String loginPin)
+	{
+		this.pin = loginPin;
+	}
+	
+}
+
+
+
+package atm;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.concurrent.Semaphore;
+
+import javax.swing.*;
+
+public class ATMUI {
+	
+
+	JFrame frame;
+	JTextField accountNumberText;
+	String accountNumber;
+	ATM atm;
+	JButton loginButton = new JButton("Login");
+	
+	public void Frame()
+	{
+		frame = new JFrame("EasyBank Login");
+		frame.setSize(600, 250);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	
+	
+	public ATM LoginUI(ATM atm)
+	{
+		final ATM atmInstance = atm;
+		JPanel panel = new JPanel();
+		frame.add(panel);
+		
+		panel.setLayout(null);
+
+		JLabel accountNumberLabel = new JLabel("Account Number: ");
+		accountNumberLabel.setBounds(10, 10, 80, 25);
+		panel.add(accountNumberLabel);
+
+		accountNumberText = new JTextField(20);
+		accountNumberText.setBounds(100, 10, 160, 25);
+		panel.add(accountNumberText);
+
+		JLabel pinLabel = new JLabel("Pin: ");
+		pinLabel.setBounds(10, 40, 80, 25);
+		panel.add(pinLabel);
+
+		JTextField pinText = new JTextField(20);
+		pinText.setBounds(100, 40, 160, 25);
+		panel.add(pinText);
+		atm.setPin(pinText.getText());
+
+		
+		loginButton.setBounds(10, 80, 80, 25);
+		panel.add(loginButton);
+		
+		
+		 loginButton.addActionListener(new ActionListener() { 
+			  public void actionPerformed(ActionEvent e) { 
+				  
+				  accountNumber = accountNumberText.getText();
+					
+			  } 
+			  
+			} );
+			
+		
+		
+
+		frame.setVisible(true);
+		return atmInstance;
+		
+		
+		
+	    
+	}
+	public String getAccountNumber() {
+	    return this.accountNumber;
+	}
+
+
+	
+	private void applyInfo() {
+
+		
+	}
+
+}
+
+package atm;
+
+import java.util.Date;
+
+public class Log {
+	
+	Date time;
+	String accountNumber1;
+	String accountNumber2;
+	double amount;
+	double balance1;
+	double balance2;
+	String transactionType;
+	
+	Log(Account account, double amount)
+	{
+		time = new Date();
+		this.accountNumber1 = account.accountNumber;
+		this.amount = amount;
+		this.balance1 = account.balance;
+		this.transactionType = "WITHDRAW";
+	}
+	
+	Log(Account account1, Account account2, double amount)
+	{
+		time = new Date();
+		this.accountNumber1 = account1.accountNumber;
+		this.amount = amount;
+		this.balance1 = account1.balance;
+		this.accountNumber2 = account2.accountNumber;
+		this.balance2 = account2.balance;
+		this.transactionType = "TRANSFER";
+	}
+	
+	
+	
+	
+
+package atm;
+
+import java.util.Date;
+import java.util.UUID;
+
+public class SessionManager {
+	
+	UUID sessionID;
+	Date sessionTime;
+	
+	SessionManager()
+	{
+		UUID.randomUUID();
+		this.sessionTime = new Date();
+		
+	}
+	
+	public boolean verifySessionIntegrity()
+	{
+		long difference;
+		Date currentTime = new Date();
+		difference = currentTime.getTime() - sessionTime.getTime();
+		
+		if (difference < 45000)
+		{
+			this.sessionTime = currentTime; 
+			return true;
+		}
+		else 
+	    {
+			System.out.println("SESSION TIMEOUT");
+			
+			return false;
+	    }
+	}
+
+}
+
+
+
+
+
+
+
+
+
