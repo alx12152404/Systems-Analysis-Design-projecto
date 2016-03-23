@@ -1,0 +1,1028 @@
+package atm;
+
+public class ATM {
+	
+	private boolean userAuthenticated;
+	private String currentAccountNumber;
+	private GUI gui;
+	private Bank bank;
+	private Log log;
+	private Session session;
+	
+	ATM()
+	{
+		userAuthenticated = false;
+		currentAccountNumber = "";
+		gui = new GUI();
+		bank = new Bank();
+		
+	}
+	
+	public static void main(String[]args)
+	{
+		ATM atm = new ATM();
+		atm.run();
+	}
+	
+	public void run()
+	{
+		while(true)
+		{
+			while(!userAuthenticated)
+			{
+				session = new Session();
+				gui.displayWelcome();
+				
+				authenticateUser();
+				
+				if(!session.verifySessionIntegrity())
+				{
+					userAuthenticated = false;
+				}
+				
+			}
+			
+			mainMenu();
+			userAuthenticated = false;
+			currentAccountNumber = "";
+		}
+	}
+
+	private void mainMenu() {
+		
+		boolean userExited = false;
+		String selection;
+		Transaction transaction = null;
+		
+		while(!userExited && session.getIsSessionActive())
+		{
+			gui.displaySelection();
+			selection = gui.getSelection();
+			
+			if(!session.verifySessionIntegrity()) 
+				{
+				   break;
+				}
+			
+			switch(selection)
+			{
+			   case "WITHDRAW":
+			   case "TRANSFER":
+			   case "DISPLAY BALANCE":
+				   
+				   transaction = newTransaction(selection);
+				   transaction.executeTransaction();
+				   log.writeLog();
+				   break;
+				   
+			   case "EXIT":
+				   
+				   gui.displayExitMessage();
+				   userExited = true;
+				   break;
+				   
+			   default:
+				   
+				   gui.displayInvalidSelection();
+				   break;
+				   			
+			}
+			
+		}
+		
+	}
+
+	private Transaction newTransaction(String selection) {
+		// TODO Auto-generated method stub
+		
+		Transaction transaction = null;
+		
+		switch(selection)
+		{
+		case "WITHDRAW":
+			
+			log = new WithdrawalLog(currentAccountNumber, gui);
+			transaction = new Withdrawal(currentAccountNumber, gui, bank, session, log);
+			break;
+			
+		case "TRANSFER":
+			
+			log = new TransferLog(currentAccountNumber, gui);
+			transaction = new Transfer(currentAccountNumber, gui, bank, session, log);
+			break;
+			
+			
+		}
+		
+		return transaction;
+		
+	}
+
+	private void authenticateUser() {
+		
+		String enteredAccountNumber = gui.getAccountNumber();
+		String enteredPin = gui.getPin();
+		userAuthenticated = bank.authenticateUser(enteredAccountNumber, enteredPin);
+		
+		if(userAuthenticated)
+		{
+			currentAccountNumber = enteredAccountNumber;
+		}
+		else
+		{
+			gui.displayInvalidCredentialsMessage();
+		}
+				
+		
+	}
+	
+	
+	
+
+}
+
+
+package atm;
+
+import java.util.Scanner;
+
+public class GUI {
+	
+	private Scanner scanner;
+	
+	GUI()
+	{
+		scanner = new Scanner(System.in);
+	}
+
+	public void displayWelcome() {
+		// TODO Auto-generated method stub
+		System.out.println("Welcome to this NetCash ATM!");
+		
+	}
+
+	public String getAccountNumber() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter your Account Number: ");
+		return scanner.next();
+		
+	}
+
+	public String getPin() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter your PIN: ");
+		return scanner.next();
+		
+	}
+
+	public void displayInvalidCredentialsMessage() {
+		// TODO Auto-generated method stub
+		System.out.println("invalid credentials");
+		
+	}
+
+	public String getSelection() {
+		
+		return scanner.next();
+		
+	}
+
+	public void displaySelection() {
+		// TODO Auto-generated method stub
+		System.out.println("Enter the name of the action you wish to perform. \n\n"
+				         + "Permitted actions are:");
+		System.out.println("                WITHDRAW");
+		System.out.println("                TRANSFER");
+		System.out.println("                SHOW BALANCE");
+		System.out.println("                EXIT");		
+	}
+
+	public String getAmount() {
+		// TODO Auto-generated method stub
+		return scanner.next();
+	}
+
+	public void displayAmounts() {
+		// TODO Auto-generated method stub
+		System.out.println("Please enter the amount you would like to withdraw. \n\n"
+				         + "Permitted values are:");
+		System.out.println("10");
+		System.out.println("20");
+		System.out.println("50");
+		System.out.println("100");
+		System.out.println("200");
+		System.out.println("EXIT");
+		
+		
+	}
+
+	public void displaySuccesfulWithdrawMessage(double amount) {
+		// TODO Auto-generated method stub
+		System.out.println("You have withdrawn £" + amount + " from your account");
+		
+	}
+
+	public void displayInsufCashATMMessage() {
+		// TODO Auto-generated method stub
+		System.out.println("Insufficient cash in this ATM");
+		
+	}
+
+	public void displayInsufCashAccMessage() {
+		// TODO Auto-generated method stub
+		System.out.println("Insufficient cash in your account");
+		
+	}
+
+	public void displayExitMessage() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void displayInvalidSelection() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public String getTransferAccountNumber() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter the Account Number of the Account you want to transfer to: ");
+		return scanner.next();
+		
+		
+	}
+
+	public String getTransferAmount() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter the Amount you want to transfer or enter EXIT to cancel: ");
+		return scanner.next();
+	}
+
+	public void displayNoAccount() {
+		// TODO Auto-generated method stub
+		System.out.println("Invalid Account Number. Try again.");
+		
+	}
+
+	public void displaySuccesfulTransferMessage(String targetAccountNumber, double amount) {
+		// TODO Auto-generated method stub
+		System.out.println("You have Transfered £" + amount + " to Account " + targetAccountNumber);
+		
+	}
+	
+	public void displayWithdrawLog(Log log)
+	{
+		System.out.println("LOG:: ACCOUNT NUMBER: " + log.getAccountNumber() + " TIME: " + log.getTime() + " AMOUNT: " + log.getAmount() + " BALANCE: " + log.getBalance());
+		
+	}
+
+	public void displayTransferLog(TransferLog transferLog) {
+		// TODO Auto-generated method stub
+		System.out.println("LOG:: ACCOUNT NUMBER: " + transferLog.getAccountNumber() + " TIME: " + transferLog.getTime() + " AMOUNT: " + transferLog.getAmount() 
+		                        + " BALANCE: " + transferLog.getBalance() + " TARGET ACCOUNT: " + transferLog.getTargetAccountNumber() + " TARGET BALANCE: " + transferLog.getTargetBalance());
+	}
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+package atm;
+
+public class Transfer extends Transaction {
+	
+	private String value;
+	private String targetAccountNumber;
+	private double targetBalance;
+	
+	Transfer(String accountNumber, GUI gui, Bank bank, Session session, Log log)
+	{
+		super(accountNumber, gui, bank, session, log);
+		
+	}
+	
+	
+	
+
+	@Override
+	public void executeTransaction() {
+		// TODO Auto-generated method stub
+		Bank bank = getBank();
+		GUI gui = getGUI();
+		Session session = getSession();
+		TransferLog log = (TransferLog) getLog();
+		boolean actionComplete = false;
+		double balance;
+		double amount;
+		
+		while(!actionComplete)
+		{
+			targetAccountNumber = gui.getTransferAccountNumber();
+			if(!session.verifySessionIntegrity()) break;
+			if(bank.verifyTargetAccount(targetAccountNumber))
+			{
+			value = gui.getTransferAmount();
+			
+			if(!session.verifySessionIntegrity()) break;
+			
+			
+			
+			
+			if( value != "EXIT")
+			{
+				balance = bank.getBalance(getAccountNumber());
+				targetBalance = bank.getBalance(targetAccountNumber);
+				amount = Double.parseDouble(value);
+				
+				if(amount <= balance)
+				{
+					
+						bank.decreaseBalance(getAccountNumber(), amount);
+						bank.increaseBalance(targetAccountNumber, amount);
+						gui.displaySuccesfulTransferMessage(targetAccountNumber, amount);
+						log.setAttributes(amount, (balance - amount), targetAccountNumber, targetBalance);
+						actionComplete = true;
+						
+				}
+				else
+				{
+					gui.displayInsufCashAccMessage();
+				}
+			}
+			else
+			{
+				actionComplete = true;
+			}
+			}
+			else
+			{
+				gui.displayNoAccount();
+			}
+		}
+		
+		
+		
+		
+		
+	}
+	
+	public String getAccountNumber()
+	{
+		return super.getAccountNumber();	
+		
+	}
+
+	}
+
+
+
+
+package atm;
+
+import java.util.Date;
+
+public class TransferLog extends Log {
+	
+	private String targetAccountNumber;
+	private double targetBalance;
+	
+
+	TransferLog(String accountNumber, GUI gui) {
+		super(accountNumber, gui);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void writeLog() {
+		// TODO Auto-generated method stub
+		GUI gui = getGUI();
+		gui.displayTransferLog(this);
+	}
+	
+	public String getTargetAccountNumber()
+	{
+		return this.targetAccountNumber;
+	}
+	
+	public double getTargetBalance()
+	{
+		return this.targetBalance;
+	}
+	
+	public void setAttributes(double amount, double balance, String targetAccountNumber, double targetBalance)
+	{
+
+		Date currentTime = new Date();
+		this.setTime(currentTime);
+		this.setAmount(amount);
+		this.setBalance(balance);
+		this.targetAccountNumber = targetAccountNumber;
+		this.targetBalance = targetBalance;
+	}
+	
+	
+
+
+}
+
+
+
+
+
+
+package atm;
+
+import java.util.Date;
+
+public class WithdrawalLog extends Log {
+
+	WithdrawalLog(String accountNumber, GUI gui) {
+		super(accountNumber, gui);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void writeLog() {
+		// TODO Auto-generated method stub
+		GUI gui = getGUI();
+		gui.displayWithdrawLog(this);
+	}
+	
+	
+	public void setAttributes(double amount, double balance)
+	{
+
+		Date currentTime = new Date();
+		this.setTime(currentTime);
+		this.setAmount(amount);
+		this.setBalance(balance);
+	}
+
+	
+	
+
+}
+
+
+
+
+
+
+
+
+
+
+package atm;
+
+public class Withdrawal extends Transaction{
+	
+	private String value;
+	
+	
+	Withdrawal(String accountNumber, GUI gui, Bank bank, Session session, Log log)
+	{
+		super(accountNumber, gui, bank, session, log);
+		
+	}
+
+
+	@Override
+	public void executeTransaction() {
+		// TODO Auto-generated method stub
+		Bank bank = getBank();
+		GUI gui = getGUI();
+		Session session = getSession();
+		WithdrawalLog log = (WithdrawalLog) getLog();
+		boolean actionComplete = false;
+		double balance;
+		double amount;
+		
+		while(!actionComplete)
+		{
+			gui.displayAmounts();
+			value = gui.getAmount();
+			
+			if(!session.verifySessionIntegrity()) break;
+			
+						
+			
+			if( value != "EXIT")
+			{
+				balance = bank.getBalance(getAccountNumber());
+				amount = Double.parseDouble(value);
+				
+				if(amount <= balance)
+				{
+					if(true) //cashManager here
+					{
+						bank.decreaseBalance(getAccountNumber(), amount);
+						gui.displaySuccesfulWithdrawMessage(amount);
+						log.setAttributes(amount, (balance - amount));
+						actionComplete = true;
+					}
+				/*	else
+					{
+						gui.displayInsufCashATMMessage();
+					}
+					*/
+				}
+				else
+				{
+					gui.displayInsufCashAccMessage();
+				}
+			}
+			else
+			{
+				actionComplete = true;
+			}
+		}
+		
+		
+		
+		
+	}
+	
+	public String getAccountNumber()
+	{
+		return super.getAccountNumber();	
+		
+	}
+
+	
+	
+}
+
+package atm;
+
+public abstract class Transaction {
+	
+	private String accountNumber;
+	private GUI gui;
+	private Bank bank;
+	private Session session;
+	private Log log;
+	
+	Transaction(String accountNumber, GUI gui, Bank bank, Session session, Log log)
+	{
+		this.accountNumber = accountNumber;
+		this.gui = gui;
+		this.bank = bank;
+		this.session = session;
+		this.log = log;
+	}
+	
+	abstract public void executeTransaction();
+	
+	public String getAccountNumber()
+	{
+		return this.accountNumber;
+	}
+	
+	public GUI getGUI()
+	{
+		return this.gui;
+	}
+	
+	public Bank getBank()
+	{
+		return this.bank;
+	}
+	
+	public Session getSession()
+	{
+		return this.session;
+	}
+	
+	public Log getLog()
+	{
+		return this.log;
+	}
+	
+	
+
+}
+
+
+
+package atm;
+
+public class Account {
+	
+	private String accountNumber;
+	private String pin;
+	private double balance;
+	
+	Account(String accountNumber, String pin, double balance)
+	{
+		this.accountNumber = accountNumber;
+		this.pin = pin;
+		this.balance = balance;
+	}
+	
+	public boolean validatePin(String enteredPin)
+	{
+		if(this.pin.equals(enteredPin))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	
+	public String getAccountNumber()
+	{
+		return this.accountNumber;
+	}
+	
+	public double getBalance()
+	{
+		return this.balance;
+	}
+	
+	public void increaseBalance(double value)
+	{
+		this.balance += value;
+	}
+	
+	public void decreaseBalance(double value)
+	{
+		this.balance -= value;
+	}
+
+}
+
+
+
+package atm;
+
+public class Bank {
+
+	private Account [] accounts;
+	
+	Bank()
+	{
+		accounts = new Account[2];
+		accounts[0] = new Account("123456789", "1234", 24.00);
+		accounts[1] = new Account("123456788", "1233", 224.00);
+	}
+	
+	
+	public boolean authenticateUser(String enteredAccountNumber, String enteredPin) 
+	{
+		Account thisAccount = getAccount(enteredAccountNumber);
+		
+		if(thisAccount != null)
+		{
+			return thisAccount.validatePin(enteredPin);
+		}
+		else
+		{
+			return false;
+		}
+				
+	}
+	
+	public boolean verifyTargetAccount(String targetAccountNumber)
+	{
+		Account targetAccount = getAccount(targetAccountNumber);
+		
+		if(targetAccount != null)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
+	
+	public Account getAccount(String accountNumber)
+	{
+		for(int i = 0; i < accounts.length; i++)
+		{
+			Account temp = accounts[i];
+			
+			
+			if(temp.getAccountNumber().equals(accountNumber))
+			{
+				return temp;
+			}
+		}
+		
+		
+		return null;
+		
+	}
+	
+	public double getBalance(String accountNumber)
+	{
+		return getAccount(accountNumber).getBalance();
+	}
+	
+	public void increaseBalance(String accountNumber, double value)
+	{
+		getAccount(accountNumber).increaseBalance(value);
+	}
+	
+	public void decreaseBalance(String accountNumber, double value)
+	{
+		getAccount(accountNumber).decreaseBalance(value);
+	}
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+}
+
+
+package atm;
+
+import java.util.Scanner;
+
+public class GUI {
+	
+	private Scanner scanner;
+	
+	GUI()
+	{
+		scanner = new Scanner(System.in);
+	}
+
+	public void displayWelcome() {
+		// TODO Auto-generated method stub
+		System.out.println("Welcome to this NetCash ATM!");
+		
+	}
+
+	public String getAccountNumber() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter your Account Number: ");
+		return scanner.next();
+		
+	}
+
+	public String getPin() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter your PIN: ");
+		return scanner.next();
+		
+	}
+
+	public void displayInvalidCredentialsMessage() {
+		// TODO Auto-generated method stub
+		System.out.println("invalid credentials");
+		
+	}
+
+	public String getSelection() {
+		
+		return scanner.next();
+		
+	}
+
+	public void displaySelection() {
+		// TODO Auto-generated method stub
+		System.out.println("Enter the name of the action you wish to perform. \n\n"
+				         + "Permitted actions are:");
+		System.out.println("                WITHDRAW");
+		System.out.println("                TRANSFER");
+		System.out.println("                SHOW BALANCE");
+		System.out.println("                EXIT");		
+	}
+
+	public String getAmount() {
+		// TODO Auto-generated method stub
+		return scanner.next();
+	}
+
+	public void displayAmounts() {
+		// TODO Auto-generated method stub
+		System.out.println("Please enter the amount you would like to withdraw. \n\n"
+				         + "Permitted values are:");
+		System.out.println("10");
+		System.out.println("20");
+		System.out.println("50");
+		System.out.println("100");
+		System.out.println("200");
+		System.out.println("EXIT");
+		
+		
+	}
+
+	public void displaySuccesfulWithdrawMessage(double amount) {
+		// TODO Auto-generated method stub
+		System.out.println("You have withdrawn £" + amount + " from your account");
+		
+	}
+
+	public void displayInsufCashATMMessage() {
+		// TODO Auto-generated method stub
+		System.out.println("Insufficient cash in this ATM");
+		
+	}
+
+	public void displayInsufCashAccMessage() {
+		// TODO Auto-generated method stub
+		System.out.println("Insufficient cash in your account");
+		
+	}
+
+	public void displayExitMessage() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void displayInvalidSelection() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public String getTransferAccountNumber() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter the Account Number of the Account you want to transfer to: ");
+		return scanner.next();
+		
+		
+	}
+
+	public String getTransferAmount() {
+		// TODO Auto-generated method stub
+		System.out.print("Enter the Amount you want to transfer or enter EXIT to cancel: ");
+		return scanner.next();
+	}
+
+	public void displayNoAccount() {
+		// TODO Auto-generated method stub
+		System.out.println("Invalid Account Number. Try again.");
+		
+	}
+
+	public void displaySuccesfulTransferMessage(String targetAccountNumber, double amount) {
+		// TODO Auto-generated method stub
+		System.out.println("You have Transfered £" + amount + " to Account " + targetAccountNumber);
+		
+	}
+	
+	public void displayWithdrawLog(Log log)
+	{
+		System.out.println("LOG:: ACCOUNT NUMBER: " + log.getAccountNumber() + " TIME: " + log.getTime() + " AMOUNT: " + log.getAmount() + " BALANCE: " + log.getBalance());
+		
+	}
+
+	public void displayTransferLog(TransferLog transferLog) {
+		// TODO Auto-generated method stub
+		System.out.println("LOG:: ACCOUNT NUMBER: " + transferLog.getAccountNumber() + " TIME: " + transferLog.getTime() + " AMOUNT: " + transferLog.getAmount() 
+		                        + " BALANCE: " + transferLog.getBalance() + " TARGET ACCOUNT: " + transferLog.getTargetAccountNumber() + " TARGET BALANCE: " + transferLog.getTargetBalance());
+	}
+
+
+
+
+
+
+
+
+}
+
+
+
+
+package atm;
+
+import java.util.Date;
+
+public abstract class Log {
+	
+	private Date time;
+	private String accountNumber;
+	private double amount;
+	private double balance;
+	private GUI gui;
+	
+	Log(String accountNumber, GUI gui)
+	{
+		
+		this.accountNumber = accountNumber;
+		this.gui = gui;
+		//this.amount = amount;
+		//this.balance = balance;
+		
+	}
+	
+	abstract public void writeLog();
+	
+	
+	public Date getTime()
+	{
+		return this.time;
+	}
+	
+	public String getAccountNumber()
+	{
+		return this.accountNumber;
+	}
+	
+	public Double getAmount()
+	{
+		return this.amount;
+	}
+	
+	public Double getBalance()
+	{
+		return this.balance;
+	}
+	
+	public GUI getGUI()
+	{
+		return this.gui;
+	}
+	
+	public void setTime(Date time)
+	{
+		this.time = time;
+	}
+	
+	public void setAmount(double amount)
+	{
+		this.amount = amount;
+	}
+	
+	
+	public void setBalance(double balance)
+	{
+		this.balance = balance;
+	}
+	
+	
+
+}
+
+
+package atm;
+
+import java.util.Date;
+import java.util.UUID;
+
+public class Session {
+	
+	private UUID sessionID;
+	private Date sessionTime;
+	private boolean isSessionActive;
+	Session()
+	{
+		UUID.randomUUID();
+		this.sessionTime = new Date();
+		this.isSessionActive = true;
+		
+	}
+	
+	public boolean verifySessionIntegrity()
+	{
+		long difference;
+		Date currentTime = new Date();
+		difference = currentTime.getTime() - sessionTime.getTime();
+		
+		if (difference < 45000)
+		{
+			this.sessionTime = currentTime; 
+			return true;
+		}
+		else 
+	    {
+			System.out.println("SESSION TIMEOUT");
+			this.isSessionActive = false;
+			return false;
+	    }
+	}
+	
+	public boolean getIsSessionActive()
+	{
+		return this.isSessionActive;
+	}
+	
+	public UUID getSessionID()
+	{
+		return this.sessionID;
+	}
+	
+
+}
+
