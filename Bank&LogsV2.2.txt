@@ -1,0 +1,274 @@
+package atm;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class Bank {
+
+	private Account [] accounts;
+	
+	Bank()
+	{
+		accounts = new Account[sizeOfDatabase()];
+		populateDatabase();
+	}
+	
+	
+	public boolean authenticateUser(String enteredAccountNumber, String enteredPin) 
+	{
+		Account thisAccount = getAccount(enteredAccountNumber);
+		
+		if(thisAccount != null)
+		{
+			return thisAccount.validatePin(enteredPin);
+		}
+		else
+		{
+			return false;
+		}
+				
+	}
+	
+	public boolean verifyTargetAccount(String targetAccountNumber)
+	{
+		Account targetAccount = getAccount(targetAccountNumber);
+		
+		if(targetAccount != null)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+	}
+	
+	public Account getAccount(String accountNumber)
+	{
+		for(int i = 0; i < accounts.length; i++)
+		{
+			System.out.println(accounts[i].getAccountNumber() + accounts[i].getBalance());
+		}
+		for(int i = 0; i < accounts.length; i++)
+		{
+			Account temp = accounts[i];
+	
+			
+			if(temp.getAccountNumber().equals(accountNumber))
+			{
+				return temp;
+			}
+		}
+		
+		
+		return null;
+		
+	}
+	
+	public double getBalance(String accountNumber)
+	{
+		return getAccount(accountNumber).getBalance();
+	}
+	
+	public void increaseBalance(String accountNumber, double value)
+	{
+		getAccount(accountNumber).increaseBalance(value);
+	}
+	
+	public void decreaseBalance(String accountNumber, double value)
+	{
+		getAccount(accountNumber).decreaseBalance(value);
+	}
+	
+	public int sizeOfDatabase()
+	{
+		int count = 0;
+		String fileName = "C:/Users/User/Documents/BankDatabase.txt";
+				
+		 try {
+	            FileReader fileReader = new FileReader(fileName);
+	          
+	            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+	            while((bufferedReader.readLine()) != null) 
+	            {
+                     count++;
+	            }   
+
+	            
+	            bufferedReader.close();         
+	        }
+	        catch(FileNotFoundException ex) 
+		    {
+	            System.out.println(
+	                "Unable to open file contained at: '" + 
+	                fileName + "'");                
+	        }
+	        catch(IOException ex) 
+		    {
+	        }
+		 return count;
+
+      }
+	
+	public void populateDatabase()
+	{
+
+		String fileName = "C:/Users/User/Documents/BankDatabase.txt";
+		
+		try {
+		FileReader fileReader = new FileReader(fileName);    
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+		
+			String line;
+			int i = 0;
+
+            while((line = bufferedReader.readLine()) != null) 
+            {
+            	String accountData[] = line.split(", "); 	
+            	double accountBalance = Double.parseDouble(accountData[2]);
+            	accounts[i] = new Account(accountData[0], accountData[1], accountBalance);
+            	i++;
+            }  
+		
+		bufferedReader.close();
+		}
+		catch(FileNotFoundException ex) 
+	    {
+            System.out.println(
+                "Unable to open file contained at: '" + 
+                fileName + "'");                
+        }
+        catch(IOException ex) 
+	    {
+        }
+		
+	}
+}
+
+
+
+
+package atm;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
+
+public class TransferLog extends Log {
+	
+	private String targetAccountNumber;
+	private double targetBalance;
+	
+
+	TransferLog(String accountNumber, GUI gui) {
+		super(accountNumber, gui);
+	}
+
+	@Override
+	public void writeLog() {
+		
+		String fileName = "C:/Users/User/Documents/LOG.txt";
+
+        try {
+            
+            FileWriter fileWriter = new FileWriter(fileName);
+
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            bufferedWriter.write("ACCOUNT NUMBER: " + this.getAccountNumber() + " TIME: " + this.getTime() + " AMOUNT: " + this.getAmount() + 
+            		                " BALANCE: " + this.getBalance()+ " TARGET ACCOUNT: " + targetAccountNumber + " TARGET BALANCE: " + targetBalance);
+
+            bufferedWriter.close();
+        }
+        catch(IOException ex) {
+            System.out.println(
+                "Error writing to file '"
+                + fileName + "'");
+        }
+	}
+	
+	/*public String getTargetAccountNumber()
+	{
+		return this.targetAccountNumber;
+	}
+	
+	public double getTargetBalance()
+	{
+		return this.targetBalance;
+	} */
+	
+	public void setAttributes(double amount, double balance, String targetAccountNumber, double targetBalance)
+	{
+
+		Date currentTime = new Date();
+		this.setTime(currentTime);
+		this.setAmount(amount);
+		this.setBalance(balance);
+		this.targetAccountNumber = targetAccountNumber;
+		this.targetBalance = targetBalance;
+	}
+	
+	
+
+
+}
+
+
+
+package atm;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
+
+public class WithdrawalLog extends Log {
+
+	WithdrawalLog(String accountNumber, GUI gui) {
+		super(accountNumber, gui);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void writeLog() {
+		
+		String fileName = "C:/Users/User/Documents/LOG.txt";
+
+        try {
+            
+            FileWriter fileWriter = new FileWriter(fileName);
+
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+
+            bufferedWriter.write("ACCOUNT NUMBER: " + this.getAccountNumber() + " TIME: " + this.getTime() + " AMOUNT: " + this.getAmount() + " BALANCE: " + this.getBalance());
+
+            bufferedWriter.close();
+        }
+        catch(IOException ex) {
+            System.out.println(
+                "Error writing to file '"
+                + fileName + "'");
+        }
+		
+		
+	}
+	
+	
+	public void setAttributes(double amount, double balance)
+	{
+
+		Date currentTime = new Date();
+		this.setTime(currentTime);
+		this.setAmount(amount);
+		this.setBalance(balance);
+	}
+
+	
+	
+
+}
