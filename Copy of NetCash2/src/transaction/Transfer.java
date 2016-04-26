@@ -17,13 +17,10 @@ public class Transfer extends Transaction {
 		super(accountNumber, gui, bank, session, log);
 		
 	}
-	
-	
-	
 
 	@Override
-	public void executeTransaction() {
-		// TODO Auto-generated method stub
+	public void executeTransaction() 
+	{
 		Bank bank = getBank();
 		GUI gui = getGUI();
 		Session session = getSession();
@@ -38,13 +35,10 @@ public class Transfer extends Transaction {
 			if(!session.verifySessionIntegrity()) break;
 			if(bank.verifyTargetAccount(targetAccountNumber))
 			{
-			value = gui.getTransferAmount();
+			   value = gui.getTransferAmount();
 			
 			if(!session.verifySessionIntegrity()) break;
-			
-			
-			
-			
+				
 			if( value != "EXIT")
 			{
 				balance = bank.getBalance(getAccountNumber());
@@ -53,13 +47,11 @@ public class Transfer extends Transaction {
 				
 				if(amount <= balance)
 				{
-		
 						bank.decreaseBalance(getAccountNumber(), amount);
 						bank.increaseBalance(targetAccountNumber, amount);
 						gui.displaySuccesfulTransferMessage(targetAccountNumber, amount);
 						log.setAttributes(amount, (balance - amount), targetAccountNumber, targetBalance);
-						actionComplete = true;
-						
+						actionComplete = true;			
 				}
 				else
 				{
@@ -75,20 +67,11 @@ public class Transfer extends Transaction {
 			{
 				gui.displayNoAccount();
 			}
-		}
-		
-		
-		
-		
-		
+		}	
 	}
 	
 	public String getAccountNumber()
 	{
-		return super.getAccountNumber();	
-		
+		return super.getAccountNumber();		
 	}
-
-	}
-
-
+}

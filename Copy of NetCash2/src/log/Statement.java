@@ -1,6 +1,7 @@
 package log;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,13 +14,16 @@ public class Statement {
 	
 	public Statement(String accountNumber)
 	{
-		getLogs(accountNumber);
-		
+		getLogs(accountNumber);	
 	}
 	
 	public void getLogs(String accountNumber)
 	{
         String fileName = "C:/Users/User/Documents/LOG" + accountNumber + ".txt";
+        File file = new File(fileName);
+        
+        if(file.exists())
+        {
 		
 		try {
 			FileReader fileReader = new FileReader(fileName);    
@@ -33,6 +37,7 @@ public class Statement {
 	            {
 	            	String logData[] = line.split(",");
 	            	String currentLine = "";
+	            	
 	            	if(logData[1].equals("WITHDRAW"))
 	            	{
 	            	   currentLine = logData[0] + " " + logData[1] + " Amount: " + logData[2] + " Balance: " + logData[3];
@@ -43,11 +48,9 @@ public class Statement {
 	            	}
 	            	
 	            	statement.add(currentLine);
-	            	//System.out.print(currentLine + "\n");
 	            	count++;
 	            	
-	            }  
-			
+	            }  	
 			bufferedReader.close();
 			}
 			catch(FileNotFoundException ex) 
@@ -55,17 +58,20 @@ public class Statement {
 	            System.out.println(
 	                "Unable to open file contained at: '" + 
 	                fileName + "'");                
-	        } catch (IOException e) {
-				// TODO Auto-generated catch block
+	        } 
+		    catch (IOException e) 
+		    {		
 				e.printStackTrace();
 			}
+        }
+		else
+		{
+			statement.add("No transactions to show.");
+		}
 	}
 	
 	public ArrayList<String> getStatement()
 	{
 		return this.statement;
 	}
-	
-	
-
 }

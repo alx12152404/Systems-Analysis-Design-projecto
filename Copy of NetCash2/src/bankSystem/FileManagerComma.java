@@ -28,7 +28,6 @@ public class FileManagerComma extends FileManager
             	double accountBalance = Double.parseDouble(accountData[2]);
             	
             	accounts.add(new Account(accountData[0], accountData[1], accountBalance));
-            	System.out.print("array was populated");
             	
             }  
 		
@@ -45,7 +44,7 @@ public class FileManagerComma extends FileManager
         }
     }
     
-    public void increaseBalance(String accountNumber, int amount)
+    public void increaseBalance(String accountNumber, double amount)
     {
     	ArrayList<String> lines = new ArrayList<String>();
     	String fileName = "C:/Users/User/Documents/BankDatabase.txt";
@@ -56,10 +55,10 @@ public class FileManagerComma extends FileManager
 		
         String line = in.readLine();
         while (line != null) {
-            if (line.startsWith(accountNumber)) {
+            if (line.startsWith(accountNumber)) 
+            {  	
             	String accountData[] = line.split(","); 	
             	double oldBalance = Double.parseDouble(accountData[2]);
-            	//double oldBalance = Double.parseDouble(line.substring(line.indexOf(",", line.indexOf(',')+1)+1).trim());
             	double newBalance = oldBalance + amount;
                 line = accountNumber + "," + accountData[1] + "," + newBalance;
             }
@@ -71,12 +70,49 @@ public class FileManagerComma extends FileManager
         PrintWriter out = new PrintWriter(fileName);
         for (String l : lines)
             out.println(l);
-        out.close();    
+            out.close();    
         
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 		}
+    }
+    
+    public void decreaseBalance(String accountNumber, double amount)
+    {
+        ArrayList<String> lines = new ArrayList<String>();
+        String fileName = "C:/Users/User/Documents/BankDatabase.txt";
+
+        BufferedReader in;
+        try {
+            in = new BufferedReader(new FileReader(fileName));
+        
+        String line = in.readLine();
+        while (line != null) 
+        {
+            if (line.startsWith(accountNumber)) 
+            {
+                String accountData[] = line.split(",");     
+                double oldBalance = Double.parseDouble(accountData[2]);
+                double newBalance = oldBalance - amount;            
+                line = accountNumber + "," + accountData[1] + "," + newBalance;
+            }
+            lines.add(line);
+            line = in.readLine();
+        }
+        in.close();
+
+        PrintWriter out = new PrintWriter(fileName);
+        
+        for (String l : lines)
+            out.println(l);
+            out.close();    
+        
+        } 
+        catch (IOException e) {
+            
+            e.printStackTrace();
+        }
     }
    
 }

@@ -8,19 +8,17 @@ import java.util.ArrayList;
 
 public class Bank {
 
-	//private static Bank bankInstance = null;
-	//private Account [] accounts;
+	private static Bank bankInstance = null;
 	private ArrayList<Account> accounts;
-	String databaseType = "COMMA";
+	Account manager = new Account("666","666", 200.00);
+	String databaseType = readDataType();
 	
 	public Bank()
 	{
-		//accounts = new Account[sizeOfDatabase()];
-
 		populateDatabase(databaseType);
 	}
 	
-	/*public static Bank getBankInstance()
+	public static Bank getBankInstance()
 	{
 		if(bankInstance == null)
 		{
@@ -28,9 +26,7 @@ public class Bank {
 		}
 		return bankInstance;
 	}
-	*/
-	
-	
+		
 	public boolean authenticateUser(String enteredAccountNumber, String enteredPin) 
 	{
 		Account thisAccount = getAccount(enteredAccountNumber);
@@ -42,8 +38,7 @@ public class Bank {
 		else
 		{
 			return false;
-		}
-				
+		}				
 	}
 	
 	public boolean verifyTargetAccount(String targetAccountNumber)
@@ -58,26 +53,20 @@ public class Bank {
 		{
 			return false;
 		}
-		
 	}
 	
 	public Account getAccount(String accountNumber)
-	{
-		
+	{	
 		for(int i = 0; i < accounts.size(); i++)
 		{
 			Account temp = accounts.get(i);
-	
 			
 			if(temp.getAccountNumber().equals(accountNumber))
 			{
 				return temp;
 			}
-		}
-		
-		
-		return null;
-		
+		}	
+		return null;	
 	}
 	
 	public double getBalance(String accountNumber)
@@ -88,52 +77,47 @@ public class Bank {
 	public void increaseBalance(String accountNumber, double value)
 	{
 		getAccount(accountNumber).increaseBalance(value);
-		FileManagerComma fileManagerComma = new FileManagerComma();
+		FileManager fileManager = null;
 		int amount = (int)value;
- 		fileManagerComma.increaseBalance(accountNumber, amount);
+ 		
+ 		switch(databaseType)
+	    {
+	        case "COMMA":
+	        fileManager = new FileManagerComma();
+	        break;
+	        
+	        case "TAB":
+	        fileManager = new FileManagerTab();
+	        break;
+	       }
+ 		
+ 		fileManager.decreaseBalance(accountNumber, amount);
 		
 	}
 	
 	public void decreaseBalance(String accountNumber, double value)
 	{
 		getAccount(accountNumber).decreaseBalance(value);
+		FileManager fileManager = null;
+		int amount = (int)value;
+ 		
+ 		switch(databaseType)
+	    {
+	        case "COMMA":
+	        fileManager = new FileManagerComma();
+	        break;
+	        
+	        case "TAB":
+	        fileManager = new FileManagerTab();
+	        break;
+	       }
+ 		
+ 		fileManager.decreaseBalance(accountNumber, amount);
+ 		
 	}
-	
-	public int sizeOfDatabase()
-	{
-	    
-		int count = 0;
-		String fileName = "C:/Users/User/Documents/BankDatabase.txt";
-				
-		 try {
-	            FileReader fileReader = new FileReader(fileName);
-	          
-	            BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-	            while((bufferedReader.readLine()) != null) 
-	            {
-                     count++;
-	            }   
-
-	            
-	            bufferedReader.close();         
-	        }
-	        catch(FileNotFoundException ex) 
-		    {
-	            System.out.println(
-	                "Unable to open file contained at: '" + 
-	                fileName + "'");                
-	        }
-	        catch(IOException ex) 
-		    {
-	        }
-		 return count;
-
-      }
 	
 	public void populateDatabase(String type)
 	{
-
 	    FileManager fileManager = null;
 	    
 	    switch(type)
@@ -147,53 +131,33 @@ public class Bank {
 	        break;
 	       }
 	       
-	    fileManager.populateBankDatabase();
-	        
-	     for(int i = 0; i < sizeOfDatabase(); i++)
+	         fileManager.populateBankDatabase();
+	    
+	    	 accounts = fileManager.accounts;        
+             accounts.add(manager);
+	}
+
+	public static String readDataType() {
 		{
-
-	    	 accounts = fileManager.accounts;
-			//accounts.add(fileManager.accounts.get(i));
+	        String dbType = "";
+	        String dbFile = "C:/Users/User/Documents/DatabaseType.txt";
+	        try {
 	        
+	        FileReader fileReader = new FileReader(dbFile);  
+	        BufferedReader bufferedReader = new BufferedReader(fileReader);
+	        dbType = bufferedReader.readLine();    
+	        bufferedReader.close();
+	       }
+	       catch(FileNotFoundException ex) 
+	        {
+	            System.out.println(
+	                "Unable to open file contained at: '" + dbFile + "'");                
+	        } 
+	        catch (IOException e) {
+	        	
+			e.printStackTrace();
 		}
-	    
-	    
-	    
-	    
-	    
-	    
-	    /*
-	    
-	    
-		String fileName = "C:/Users/c12161578/Desktop/BankDatabase.txt";
-		
-		try {
-		FileReader fileReader = new FileReader(fileName);    
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-		
-			String line;
-			int i = 0;
-
-            while((line = bufferedReader.readLine()) != null) 
-            {
-            	String accountData[] = line.split(", "); 	
-            	double accountBalance = Double.parseDouble(accountData[2]);
-            	accounts[i] = new Account(accountData[0], accountData[1], accountBalance);
-            	i++;
-            }  
-		
-		bufferedReader.close();
-		}
-		catch(FileNotFoundException ex) 
-	    {
-            System.out.println(
-                "Unable to open file contained at: '" + 
-                fileName + "'");                
-        }
-        catch(IOException ex) 
-	    {
-        }
-        */
-		
+	        return dbType;
+	    }
 	}
 }

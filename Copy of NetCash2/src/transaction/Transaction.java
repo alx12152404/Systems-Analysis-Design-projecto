@@ -48,7 +48,4 @@ public abstract class Transaction {
 	{
 		return this.log;
 	}
-	
-	
-
 }

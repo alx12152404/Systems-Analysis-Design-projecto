@@ -12,8 +12,7 @@ public class Session {
 	{
 		UUID.randomUUID();
 		this.sessionTime = new Date();
-		this.isSessionActive = true;
-		
+		this.isSessionActive = true;	
 	}
 	
 	public boolean verifySessionIntegrity()
@@ -44,6 +43,4 @@ public class Session {
 	{
 		return this.sessionID;
 	}
-	
-
 }

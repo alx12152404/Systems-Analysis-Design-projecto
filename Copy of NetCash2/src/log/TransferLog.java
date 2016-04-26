@@ -35,7 +35,8 @@ public class TransferLog extends Log {
             bufferedWriter.flush();
             bufferedWriter.close();
         }
-        catch(IOException ex) {
+        catch(IOException ex) 
+        {
             System.out.println(
                 "Error writing to file '"
                 + fileName + "'");
@@ -55,26 +56,14 @@ public class TransferLog extends Log {
         }
         catch(IOException ex) {
             System.out.println(
-                "Error writing to file '"
-                + targetFileName + "'");
+                "Error writing to file '" + targetFileName + "'");
         }
         
         
 	}
 	
-	/*public String getTargetAccountNumber()
-	{
-		return this.targetAccountNumber;
-	}
-	
-	public double getTargetBalance()
-	{
-		return this.targetBalance;
-	} */
-	
 	public void setAttributes(double amount, double balance, String targetAccountNumber, double targetBalance)
 	{
-
 		Date currentTime = new Date();
 		this.setTime(currentTime);
 		this.setAmount(amount);
@@ -82,8 +71,4 @@ public class TransferLog extends Log {
 		this.targetAccountNumber = targetAccountNumber;
 		this.targetBalance = targetBalance;
 	}
-	
-	
-
-
 }

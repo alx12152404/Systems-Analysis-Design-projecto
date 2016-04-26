@@ -12,17 +12,15 @@ public class Withdrawal extends Transaction{
 	private String value;
 	private CashManager cashManager;
 	
-	
 	public Withdrawal(String accountNumber, GUI gui, Bank bank, Session session, Log log, CashManager cashManager)
 	{
 		super(accountNumber, gui, bank, session, log);
 		this.cashManager = cashManager;
 	}
 
-
 	@Override
-	public void executeTransaction() {
-		// TODO Auto-generated method stub
+	public void executeTransaction() 
+	{
 		Bank bank = getBank();
 		GUI gui = getGUI();
 		Session session = getSession();
@@ -38,8 +36,6 @@ public class Withdrawal extends Transaction{
 			
 			if(!session.verifySessionIntegrity()) break;
 			
-						
-			
 			if( value != "0")
 			{
 				amount = Integer.parseInt(value);
@@ -47,9 +43,7 @@ public class Withdrawal extends Transaction{
 				if(cashManager.ensureAmountPermitted(amount))
 				{
 				balance = bank.getBalance(getAccountNumber());
-				
-				
-				
+					
 				if(amount <= balance)
 				{
 					if(cashManager.isCashAvailable(amount))
@@ -58,14 +52,12 @@ public class Withdrawal extends Transaction{
 						bank.decreaseBalance(getAccountNumber(), amount);
 						gui.displaySuccesfulWithdrawMessage(amount);
 						log.setAttributes(amount, (balance - amount));
-						//log.writeLog();
 						actionComplete = true;
 					}
 					else
 					{
 						gui.displayInsufCashATMMessage();
-					}
-					
+					}	
 				}
 				else
 				{
@@ -81,22 +73,12 @@ public class Withdrawal extends Transaction{
 			{
 				actionComplete = true;
 			}
-			
-			}
-				
-		
-		
-		
-		
 		}
-	
+	}
 	
 	public String getAccountNumber()
 	{
 		return super.getAccountNumber();	
 		
-	}
-
-	
-	
+	}	
 }

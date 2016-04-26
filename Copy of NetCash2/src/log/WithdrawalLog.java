@@ -11,7 +11,6 @@ public class WithdrawalLog extends Log {
 
 	public WithdrawalLog(String accountNumber, GUI gui) {
 		super(accountNumber, gui);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -22,34 +21,27 @@ public class WithdrawalLog extends Log {
         try {
             
             FileWriter fileWriter = new FileWriter(fileName, true);
-
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-            bufferedWriter.write(formatDate(this.getTime()) + "," +"WITHDRAW" + "," + "," + this.getAmount() + "," + this.getBalance());
+            
+            bufferedWriter.write(formatDate(this.getTime()) + "," +"WITHDRAW" + "," + this.getAmount() + "," + this.getBalance());
             bufferedWriter.newLine();
             bufferedWriter.flush();
             bufferedWriter.close();
         }
-        catch(IOException ex) {
+        catch(IOException ex) 
+        {
             System.out.println(
-                "Error writing to file '"
-                + fileName + "'");
+                "Error writing to file '" + fileName + "'");
         }
 		
 		
 	}
-	
-	
+		
 	public void setAttributes(double amount, double balance)
 	{
-
 		Date currentTime = new Date();
 		this.setTime(currentTime);
 		this.setAmount(amount);
 		this.setBalance(balance);
 	}
-
-	
-	
-
 }

@@ -2,10 +2,10 @@ package atm;
 
 public class CashManager {
 		
-		private static final int[] notes = {100, 50, 20, 10};	
-		private static final int[] initialCount = {1, 1, 1, 1};
-		private int[] currentCount = {0, 0, 0, 0};
-        private int[] tempCount = {0, 0, 0, 0};
+		private static final int[] notes = {200, 100, 50, 20, 10};	
+		private static final int[] initialCount = {0, 5, 30, 50, 10};
+		private int[] currentCount = {0, 0, 0, 0, 0};
+        private int[] tempCount = {0,0, 0, 0, 0};
 		
 		CashManager()
 		{
@@ -47,22 +47,18 @@ public class CashManager {
 			for(int i = 0; i < notes.length; i++)
 			{
 				currentCount[i] -= amount / notes[i];
-
 			}	
 		}
 		
 		public boolean ensureAmountPermitted(int amount)
 		{
-			
 			for(int i = 0; i < notes.length; i++)
 			{
-				if(amount == notes[i])
+				if(amount == notes[i] || amount == 200)
 				{
 					return true;
 				}
-			}
-			
-			return false;
-			
+			}			
+			return false;			
 		}
 }

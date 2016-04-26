@@ -14,11 +14,9 @@ public abstract class Log {
 	private GUI gui;
 	
 	Log(String accountNumber, GUI gui)
-	{
-		
+	{	
 		this.accountNumber = accountNumber;
-		this.gui = gui;
-		
+		this.gui = gui;		
 	}
 	
 	abstract public void writeLog();
@@ -70,7 +68,4 @@ public abstract class Log {
 	{
 		this.balance = balance;
 	}
-	
-	
-
 }
